@@ -8,6 +8,11 @@
 namespace Hazel {
 
 	static bool s_GLFWInitialized = false;
+	//错误回调函数
+	static void GLFWErrorCallback(int error, const char* description)
+	{
+		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
+	}
 
 	Window* Window::Create(const WindowProps& props)
 	{
@@ -37,7 +42,8 @@ namespace Hazel {
 			// TODO: glfwTerminate on system shutdown
 			int success = glfwInit();
 			HZ_CORE_ASSERT(success, "Could not intialize GLFW!");
-
+			//设置错误回调函数
+			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
 
