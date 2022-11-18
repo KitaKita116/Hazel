@@ -5,6 +5,8 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
+#include <glad/glad.h>
+
 namespace Hazel {
 
 	static bool s_GLFWInitialized = false;
@@ -48,7 +50,10 @@ namespace Hazel {
 		}
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		//设置当前窗口的上下文
 		glfwMakeContextCurrent(m_Window);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		HZ_CORE_ASSERT(status, "Failed to initalize Glad!");
 		//通过glfwSetWindowUserPointer()把需要的data以指针的方式传递给window。
 		//当需要在callBack函数中获取data时，调用glfwGetWindowUserPointer()
 		glfwSetWindowUserPointer(m_Window, &m_Data);
