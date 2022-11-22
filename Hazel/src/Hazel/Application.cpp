@@ -6,6 +6,7 @@
 #include "Hazel/Log.h"
 
 #include <glad/glad.h>
+#include "Input.h"
 
 namespace Hazel
 {
@@ -15,7 +16,7 @@ namespace Hazel
 
 	Application::Application()
 	{
-		HZ_CORE_ASSERT(s_Instance, "Application already exist!");
+		HZ_CORE_ASSERT(!s_Instance, "Application already exist!");
 		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
@@ -56,6 +57,9 @@ namespace Hazel
 			
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
+
+			auto [x, y] = Input::GetMousePosition();
+			HZ_CORE_TRACE("{0},{1}", x, y);
 
 			m_Window->OnUpdate();
 
