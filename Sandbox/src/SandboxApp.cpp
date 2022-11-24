@@ -11,7 +11,6 @@ public:
 
 	void OnUpdate() override
 	{
-		//HZ_INFO("ExampleLayer::Update");
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_TAB))
 		{
 			HZ_CORE_TRACE("TAB is pressed(update)");
@@ -37,7 +36,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExamplerLayer());
-		PushLayer(new Hazel::ImGuiLayer());
 	}
 	~Sandbox()
 	{
