@@ -1,4 +1,5 @@
 #include <Hazel.h>
+#include "imgui/imgui.h"
 
 class ExamplerLayer : public Hazel::Layer
 {
@@ -15,6 +16,13 @@ public:
 		{
 			HZ_CORE_TRACE("TAB is pressed(update)");
 		}
+	}
+
+	virtual void OnImGuiRender() override
+	{
+		//ImGui::Begin("Test");
+		ImGui::Text("test test");
+		//ImGui::End();
 	}
 
 	void OnEvent(Hazel::Event& event) override
