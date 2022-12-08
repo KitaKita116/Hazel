@@ -18,10 +18,6 @@ namespace Hazel {
 	{
 	}
 
-	ImGuiLayer::~ImGuiLayer()
-	{
-	}
-
 	void ImGuiLayer::OnAttach()
 	{
 		//参考文件example_sdl_opengl3的main.cpp编写

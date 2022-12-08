@@ -10,7 +10,7 @@ namespace Hazel
 	{
 	public:
 		Layer(const std::string& name = "Layer");
-		virtual ~Layer();
+		virtual ~Layer() = default;
 
 		//²ã±»ÍÆËÍ
 		virtual void OnAttach() {};
