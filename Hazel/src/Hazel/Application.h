@@ -8,6 +8,7 @@
 
 #include "Hazel/ImGui/ImGuiLayer.h"
 #include "Hazel/Renderer/Shader.h"
+#include "Hazel/Renderer/Buffer.h"
 
 namespace Hazel {
 
@@ -30,8 +31,10 @@ namespace Hazel {
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 
-		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		unsigned int m_VertexArray;
 		std::unique_ptr<Shader> m_Shader;//Shader指针
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;//顶点缓冲指针
+		std::unique_ptr<IndexBuffer> m_IndexBuffer;//顶点索引指针
 
 	private:
 		static Application* s_Instance;
