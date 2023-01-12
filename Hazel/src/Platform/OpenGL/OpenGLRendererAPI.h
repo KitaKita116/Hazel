@@ -13,5 +13,7 @@ namespace Hazel
 		virtual void Clear() override;
 		//ÏÔÊ¾VAOµÄÄÚÈİ
 		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
+
+		virtual void Init() override;
 	};
 }

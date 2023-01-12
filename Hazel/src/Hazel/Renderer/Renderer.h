@@ -11,6 +11,7 @@ namespace Hazel
 	class Renderer
 	{
 	public:
+		static void Init();
 		//场景开始
 		static void BeginScene(OrthographicCamera& camera);
 		//场景结束
