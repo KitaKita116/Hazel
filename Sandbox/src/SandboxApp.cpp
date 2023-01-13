@@ -34,11 +34,12 @@ public:
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
-		m_Shader.reset(Hazel::Shader::Create("assets/shaders/Texture.glsl"));
+		m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 		m_Texture = Hazel::Texture2D::Create("assets/textures/awesomeface.png");
 
-		m_Shader->Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_Shader)->UploadUniformInt("u_Texture", 0);
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+		textureShader->Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Hazel::Timestep ts) override
@@ -67,8 +68,11 @@ public:
 
 		Hazel::Renderer::BeginScene(m_Camera);
 
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+		textureShader->Bind();
+
 		m_Texture->Bind();
-		Hazel::Renderer::Submit(m_Shader, m_VertexArray);
+		Hazel::Renderer::Submit(textureShader, m_VertexArray);
 
 		Hazel::Renderer::EndScene();
 	}
@@ -85,6 +89,7 @@ public:
 
 	}
 private:
+	Hazel::ShaderLibrary m_ShaderLibrary;
 	Hazel::Ref<Hazel::Shader> m_Shader;//Shader÷∏’Î
 	Hazel::Ref<Hazel::VertexArray> m_VertexArray;//VAO÷∏’Î
 	Hazel::Ref<Hazel::Texture2D> m_Texture;
