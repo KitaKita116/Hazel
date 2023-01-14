@@ -22,6 +22,15 @@ namespace Hazel {
 		HZ_CORE_INFO("  Vendor: {0}", glGetString(GL_VENDOR)); //返回负责当前OpenGL实现厂商的名字
 		HZ_CORE_INFO("  Renderer: {0}", glGetString(GL_RENDERER));//返回一个渲染器标识符，通常是个硬件平台
 		HZ_CORE_INFO("  Version: {0}", glGetString(GL_VERSION));//返回OpenGL版本号
+
+#ifdef HZ_ENABLE_ASSERTS
+		int versionMajor;
+		int versionMinor;
+		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+		glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+
+		HZ_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Hazel requires at least OpenGL version 4.5!");
+#endif
 	}
 
 	void Hazel::OpenGLContex::SwapBuffers()

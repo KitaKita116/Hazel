@@ -81,10 +81,15 @@ namespace Hazel {
 			std::string type = source.substr(begin, eol - begin);//读取type后面的信息
 			HZ_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
-			size_t nextLinePos = source.find_first_not_of("\r\n", eol);//找到下一行的起始位置
-			pos = source.find(typeToken, nextLinePos);
-			//将着色器数据写入哈希表
-			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			//size_t nextLinePos = source.find_first_not_of("\r\n", eol);//找到下一行的起始位置
+			//pos = source.find(typeToken, nextLinePos);
+			////将着色器数据写入哈希表
+			//shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			size_t nextLinePos = source.find_first_not_of("\r\n", eol); //Start of shader code after shader type declaration line
+			HZ_CORE_ASSERT(nextLinePos != std::string::npos, "Syntax error");
+			pos = source.find(typeToken, nextLinePos); //Start of next shader type declaration line
+
+			shaderSources[ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
 		}
 
 		return shaderSources;
@@ -95,7 +100,7 @@ namespace Hazel {
 
 		GLuint program = glCreateProgram();
 		HZ_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now");
-		std::array<GLenum,2> glShaderIDs;//存储对应的Shader
+		std::array<GLenum, 2> glShaderIDs;//存储对应的Shader
 		int shaderInd = 0;
 
 		for (auto& kv : shaderSources)
@@ -167,7 +172,10 @@ namespace Hazel {
 
 		// Always detach shaders after a successful link.
 		for (auto id : glShaderIDs)
+		{
 			glDetachShader(program, id);
+			glDeleteShader(id);
+		}
 	}
 
 	OpenGLShader::~OpenGLShader()

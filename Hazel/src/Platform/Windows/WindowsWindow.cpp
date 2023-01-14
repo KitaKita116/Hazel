@@ -51,7 +51,7 @@ namespace Hazel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 
-		m_Contex = new OpenGLContex(m_Window);
+		m_Contex = CreateScope< OpenGLContex>(m_Window);
 		m_Contex->Init();
 
 		//通过glfwSetWindowUserPointer()把需要的data以指针的方式传递给window。
