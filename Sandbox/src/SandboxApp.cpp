@@ -1,8 +1,11 @@
 #include "Hazel/Hazel.h"
+#include <Hazel/Core/EntryPoint.h>
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <Platform/OpenGL/OpenGLShader.h>
+
+#include "Sandbox2D.h"
 
 class ExamplerLayer : public Hazel::Layer
 {
@@ -89,7 +92,7 @@ class Sandbox : public Hazel::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExamplerLayer());
+		PushLayer(new Sandbox2D());
 	}
 	~Sandbox()
 	{
