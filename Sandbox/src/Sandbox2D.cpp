@@ -13,7 +13,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-
+	m_faceTexture = Hazel::Texture2D::Create("assets/textures/awesomeface.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -31,7 +31,8 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-	Hazel::Renderer2D::DrawQuad({ 0,0 }, { 1,1 }, { 1,0,0,1 });
+	Hazel::Renderer2D::DrawQuad({ 0,1 }, { 1,1 }, { 1,1,0,1 });
+	Hazel::Renderer2D::DrawQuad({ 0,0 ,1.0 }, { 1,1 }, m_faceTexture);
 	Hazel::Renderer2D::EndScene();
 }
 
