@@ -1,9 +1,8 @@
-#include "Hazel/Hazel.h"
+#include <Hazel.h>
 #include <Hazel/Core/EntryPoint.h>
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
-#include <Platform/OpenGL/OpenGLShader.h>
 
 #include "Sandbox2D.h"
 
@@ -13,7 +12,7 @@ public:
 	ExamplerLayer()
 		: Layer("Example"), m_CameraController(1280.0f/720.0f,true)
 	{
-		m_VertexArray.reset(Hazel::VertexArray::Create());
+		m_VertexArray = Hazel::VertexArray::Create();
 
 		float vertices[4 * 5] =
 		{
@@ -23,8 +22,7 @@ public:
 			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 		};
 
-		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
+		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer = Hazel::VertexBuffer::Create(vertices, sizeof(vertices));
 		Hazel::BufferLayout layout = {
 			{ Hazel::ShaderDataType::Float3, "a_Position" },
 			{ Hazel::ShaderDataType::Float2, "a_TexCoords" }
@@ -34,7 +32,7 @@ public:
 
 		uint32_t indices[6] = { 0, 1, 2 , 2, 3, 0};
 		Hazel::Ref<Hazel::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		indexBuffer = Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
@@ -42,7 +40,7 @@ public:
 
 		auto textureShader = m_ShaderLibrary.Get("Texture");
 		textureShader->Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
+		textureShader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Hazel::Timestep ts) override

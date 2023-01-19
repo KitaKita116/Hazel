@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <fstream>
-#include "OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Hazel {
 
@@ -52,10 +52,18 @@ namespace Hazel {
 		if (in)
 		{
 			in.seekg(0, std::ios::end);//移动标识符到文件末尾
-			result.resize(in.tellg());//设置字符串大小为文件大小
-			in.seekg(0, std::ios::beg);
-			in.read(&result[0], result.size());//读入文件到字符串
-			in.close();
+			size_t size = in.tellg();
+			if (size != -1)
+			{
+				result.resize(size);
+				in.seekg(0, std::ios::beg);
+				in.read(&result[0], size);
+				in.close();
+			}
+			else
+			{
+				HZ_CORE_ERROR("Could not read from file '{0}'", filepath);
+			}
 		}
 		else
 		{

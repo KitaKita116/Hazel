@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Hazel/Renderer/GraphicsContex.h"
+#include "Hazel/Renderer/GraphicsContext.h"
 
 struct GLFWwindow;
 
 namespace Hazel
 {
-	class OpenGLContex :public GraphicsContex
+	class OpenGLContext :public GraphicsContext
 	{
 	public:
-		OpenGLContex(GLFWwindow* windowHandle);
+		OpenGLContext(GLFWwindow* windowHandle);
 
 		virtual void Init() override;
 		virtual void SwapBuffers() override;

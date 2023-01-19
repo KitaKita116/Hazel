@@ -1,7 +1,7 @@
 #include "hzpch.h"
-#include "Shader.h"
+#include "Hazel/Renderer/Shader.h"
 
-#include "Renderer.h"
+#include "Hazel/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Hazel {
@@ -13,7 +13,7 @@ namespace Hazel {
 		case RendererAPI::API::None:
 			HZ_CORE_ASSERT(false, "Renderer::None is not support!"); return nullptr;
 		case RendererAPI::API::OpenGL:
-			return  std::make_shared< OpenGLShader>(filepath);
+			return  CreateRef<OpenGLShader>(filepath);
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -27,7 +27,7 @@ namespace Hazel {
 		case RendererAPI::API::None:
 			HZ_CORE_ASSERT(false, "Renderer::None is not support!"); return nullptr;
 		case RendererAPI::API::OpenGL:
-			return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+			return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
 		}
 
 		HZ_CORE_ASSERT(false, "Unknown RendererAPI!");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Hazel/Hazel.h>
+#include <Hazel.h>
 
 class Sandbox2D : public Hazel::Layer
 {

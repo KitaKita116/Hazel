@@ -1,17 +1,16 @@
 #include "hzpch.h"
-#include "WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 
 #include "Hazel/Events/ApplicationEvent.h"
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
-#include "Platform/OpenGL/OpenGLContex.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
 namespace Hazel {
 
 	//static bool s_GLFWInitialized = false;
 	static uint8_t s_GLFWWindowCount = 0;
-
 	
 	//错误回调函数
 	static void GLFWErrorCallback(int error, const char* description)
@@ -19,9 +18,9 @@ namespace Hazel {
 		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	Window* Window::Create(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProps& props)
 	{
-		return new WindowsWindow(props);
+		return CreateScope<WindowsWindow>(props);
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -56,7 +55,7 @@ namespace Hazel {
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		s_GLFWWindowCount++;
 
-		m_Contex = CreateScope< OpenGLContex>(m_Window);
+		m_Contex = GraphicsContext::Create(m_Window);
 		m_Contex->Init();
 
 		//通过glfwSetWindowUserPointer()把需要的data以指针的方式传递给window。
