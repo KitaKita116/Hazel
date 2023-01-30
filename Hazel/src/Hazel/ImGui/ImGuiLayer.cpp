@@ -20,6 +20,8 @@ namespace Hazel {
 
 	void ImGuiLayer::OnAttach()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		//参考文件example_sdl_opengl3的main.cpp编写
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -60,6 +62,8 @@ namespace Hazel {
 
 	void ImGuiLayer::OnDetach()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		//释放相关资源
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -68,6 +72,8 @@ namespace Hazel {
 
 	void ImGuiLayer::Begin()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		// 这个函数应该只会执行一次具体的内容, 会在里面创建OpenGL的ShaderProgram
 		ImGui_ImplOpenGL3_NewFrame();
 
@@ -79,6 +85,8 @@ namespace Hazel {
 
 	void ImGuiLayer::End()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
@@ -94,12 +102,6 @@ namespace Hazel {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
-	}
-
-	void ImGuiLayer::OnImGuiRender()
-	{
-		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
 	}
 
 }
