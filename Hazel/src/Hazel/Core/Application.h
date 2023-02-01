@@ -10,6 +10,8 @@
 #include "Hazel/ImGui/ImGuiLayer.h"
 #include "Hazel/Core/Timestep.h"
 
+int main(int argc, char** argv);
+
 namespace Hazel {
 
 	class Application
@@ -17,13 +19,13 @@ namespace Hazel {
 	public:
 		Application();
 		virtual ~Application();
-		void Run();
 		void OnEvent(Event& e);
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
 	private:
+		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
@@ -36,6 +38,8 @@ namespace Hazel {
 
 	private:
 		static Application* s_Instance;
+		//让main函数成为该类的友元函数
+		friend int ::main(int argc, char** argv);
 	};
 
 	Application* CreateApplication();

@@ -44,8 +44,10 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Renderer Draw");
 		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Hazel::Renderer2D::DrawQuad({ 0,1 }, { 1,1 }, { 1,1,0,1 });
-		Hazel::Renderer2D::DrawQuad({ 0,0 ,1.0 }, { 1,1 }, m_faceTexture);
+		Hazel::Renderer2D::DrawQuad({ 0, 1 ,0}, { 1,1 }, { 1,1,0,1 });
+		Hazel::Renderer2D::DrawQuad({ 0, 0 ,0}, { 1,1 }, m_faceTexture);
+		Hazel::Renderer2D::DrawRotatedQuad({ 1,1 }, { 1,1 }, 30.0f, { 1,0,0,1 });
+		//Hazel::Renderer2D::DrawQuad({ 1,0 ,1.0 }, { 1,1 }, m_faceTexture, 10.0f, { 1.0,0.0,0.0,1.0 });
 		Hazel::Renderer2D::EndScene();
 	}
 }
