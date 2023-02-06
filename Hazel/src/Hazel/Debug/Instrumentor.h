@@ -72,14 +72,14 @@ namespace Hazel {
 		{
 			std::stringstream json;
 
-			std::string name = result.Name;
-			std::replace(name.begin(), name.end(), '"', '\'');
+			//std::string name = result.Name;
+			//std::replace(name.begin(), name.end(), '"', '\'');
 
 			json << std::setprecision(3) << std::fixed;
 			json << ",{";
 			json << "\"cat\":\"function\",";
 			json << "\"dur\":" << (result.End - result.Start) << ',';
-			json << "\"name\":\"" << name << "\",";
+			json << "\"name\":\"" << result.Name << "\",";
 			json << "\"ph\":\"X\",";
 			json << "\"pid\":0,";
 			json << "\"tid\":" << result.ThreadID << ",";

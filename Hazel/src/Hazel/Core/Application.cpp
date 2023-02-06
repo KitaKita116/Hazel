@@ -60,9 +60,9 @@ namespace Hazel
 
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			(*it)->OnEvent(e);
 			if (e.Handled)//如果事件已处理
 				break;
+			(*it)->OnEvent(e);
 		}
 	}
 	void Application::Run()
