@@ -48,6 +48,10 @@ namespace Hazel
 		m_LayerStack.PushOverlay(overlay);
 		overlay->OnAttach();
 	}
+	void Application::Close()
+	{
+		m_Running = false;
+	}
 	void Application::OnEvent(Event& e)
 	{
 		HZ_PROFILE_FUNCTION();
