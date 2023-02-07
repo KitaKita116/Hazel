@@ -346,6 +346,7 @@ namespace Hazel {
 	void Renderer2D::ResetStats()
 	{
 		memset(&s_Data.Stats, 0, sizeof(Statistics));
+
 	}
 
 	Renderer2D::Statistics Renderer2D::GetStats()
