@@ -148,7 +148,7 @@ namespace Hazel {
 
 		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 
-		s_Data.Stats.DrawCall++;
+		s_Data.Stats.DrawCalls++;
 	}
 
 	//提交和重置渲染信息

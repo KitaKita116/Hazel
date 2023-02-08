@@ -29,11 +29,11 @@ namespace Hazel
 	
 		struct Statistics
 		{
-			uint32_t DrawCall;
+			uint32_t DrawCalls;
 			uint32_t QuadCount;
 
 			uint32_t GetTotalVertexCount() { return QuadCount * 4; }
-			uint32_t GetTotalindicesCount() { return QuadCount * 6; }
+			uint32_t GetTotalIndexCount() { return QuadCount * 6; }
 		};
 		//÷ÿ÷√º∆ ˝
 		static void ResetStats();
