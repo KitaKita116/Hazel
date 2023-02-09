@@ -31,6 +31,9 @@ namespace Hazel
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		Ref<Framebuffer> m_Framebuffer;
+
+		Ref<Scene> m_ActiveScene;
+		entt::entity m_SquareEntity;
 	};
 
 }

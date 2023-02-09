@@ -24,6 +24,13 @@ namespace Hazel {
 		spec.Width = 1280;
 		spec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(spec);
+
+		m_ActiveScene = CreateRef<Scene>();
+		auto square = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformComponent>(square);
+		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4(1.0, 0.0, 0.0, 1.0));
+
+		m_SquareEntity = square;
 	}
 
 	void EditorLayer::OnDetach()
@@ -38,7 +45,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		// Resize
-		if (Hazel::FramebufferSpecification spec = m_Framebuffer->GetSpecification();
+		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
@@ -52,24 +59,17 @@ namespace Hazel {
 
 		// Render
 		Renderer2D::ResetStats();
-		{
-			HZ_PROFILE_SCOPE("Renderer Prep");
 			m_Framebuffer->Bind();
 			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 			RenderCommand::Clear();
-		}
 
 		{
 			HZ_PROFILE_SCOPE("Renderer Draw");
 
-			static float rotation = 0;
-			rotation += ts * 30;
-
 			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			Renderer2D::DrawQuad({ 0, 0 }, { 1,1 }, { 1,0,0,1 });
-			Renderer2D::DrawQuad({ 0,1 }, { 1,1 }, m_kitaTexture);
-			Renderer2D::DrawRotatedQuad({ 1,0 }, { 1,1 }, 45, { 0,1,0,1 });
-			Renderer2D::DrawRotatedQuad({ 1, 1 }, { 1,1 }, 45, m_kitaTexture);
+
+			m_ActiveScene->OnUpdate(ts);
+
 			Renderer2D::EndScene();
 			m_Framebuffer->Unbind();
 		}
@@ -146,6 +146,9 @@ namespace Hazel {
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+
+		auto& square = m_ActiveScene->Reg().get<SpriteRendererComponent>(m_SquareEntity).Color;
+		ImGui::ColorEdit4("Color", glm::value_ptr(square));
 
 		ImGui::End();
 
