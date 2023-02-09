@@ -6,6 +6,7 @@
 
 namespace Hazel
 {
+	class Entity;
 
 	class Scene
 	{
@@ -13,14 +14,14 @@ namespace Hazel
 		Scene();
 		~Scene();
 
-		entt::entity CreateEntity();
-
-		entt::registry& Reg() { return m_Registry; }
+		Entity CreateEntity(const std::string& name = std::string());
 
 		void OnUpdate(Timestep ts);
 	private:
 		//包含所有entity的容器
 		entt::registry m_Registry;
+
+		friend class Entity;
 	};
 
 }

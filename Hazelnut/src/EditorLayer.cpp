@@ -26,9 +26,8 @@ namespace Hazel {
 		m_Framebuffer = Framebuffer::Create(spec);
 
 		m_ActiveScene = CreateRef<Scene>();
-		auto square = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformComponent>(square);
-		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4(1.0, 0.0, 0.0, 1.0));
+		auto square = m_ActiveScene->CreateEntity("Quad");
+		square.AddComponent<SpriteRendererComponent>(glm::vec4(1.0, 0.0, 0.0, 1.0));
 
 		m_SquareEntity = square;
 	}
@@ -147,11 +146,15 @@ namespace Hazel {
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
-		auto& square = m_ActiveScene->Reg().get<SpriteRendererComponent>(m_SquareEntity).Color;
-		ImGui::ColorEdit4("Color", glm::value_ptr(square));
+		if (m_SquareEntity) 
+		{
+			auto& squareColor = m_SquareEntity.GetComponment<SpriteRendererComponent>().Color;
+			ImGui::ColorEdit4("Color", glm::value_ptr(squareColor));
+		}
 
 		ImGui::End();
 
+		//将窗口边距样式推送到栈上，并设置为 "ImVec2{ 0, 0 }"，这意味着将窗口边距设置为零
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 
