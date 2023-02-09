@@ -126,6 +126,20 @@ namespace Hazel {
 		//初始化插槽下标为1(0是白色纹理)
 		s_Data.TextureSlotIndex = 1;
 	}
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 viewProj = camera.GetProjection() * glm::inverse(transform);
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		//初始化插槽下标为1(0是白色纹理)
+		s_Data.TextureSlotIndex = 1;
+	}
 
 	void Renderer2D::EndScene()
 	{

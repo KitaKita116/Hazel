@@ -23,7 +23,7 @@ namespace Hazel
 		}
 		//获取组件
 		template<typename T>
-		T& GetComponment()
+		T& GetComponent()
 		{
 			HZ_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
