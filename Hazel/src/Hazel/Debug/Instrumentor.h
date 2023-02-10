@@ -4,7 +4,6 @@
 #include <chrono>
 #include <algorithm>
 #include <fstream>
-#include <iomanip>
 
 #include <thread>
 
@@ -13,7 +12,7 @@ namespace Hazel {
 	{
 		std::string Name;
 		long long Start, End;
-		std::thread::id ThreadID;
+		uint32_t ThreadID;
 	};
 
 	struct InstrumentationSession
@@ -23,86 +22,56 @@ namespace Hazel {
 
 	class Instrumentor
 	{
+	private:
+		InstrumentationSession* m_CurrentSession;
+		std::ofstream m_OutputStream;
+		int m_ProfileCount;
 	public:
-		Instrumentor(const Instrumentor&) = delete;
-		Instrumentor(Instrumentor&&) = delete;
+		Instrumentor()
+			: m_CurrentSession(nullptr), m_ProfileCount(0)
+		{
+		}
 
 		void BeginSession(const std::string& name, const std::string& filepath = "results.json")
 		{
-			//std::lock_guard对象构造时，传入的mutex对象(即它所管理的mutex对象)会被当前线程锁住。在lock_guard对象被析构时，它所管理的mutex对象会自动解锁
-			std::lock_guard lock(m_Mutex);
-			if (m_CurrentSession) {
-				// If there is already a current session, then close it before beginning new one.
-				// Subsequent profiling output meant for the original session will end up in the
-				// newly opened session instead.  That's better than having badly formatted
-				// profiling output.
-				if (Log::GetCoreLogger()) { // Edge case: BeginSession() might be before Log::Init()
-					HZ_CORE_ERROR("Instrumentor::BeginSession('{0}') when session '{1}' already open.", name, m_CurrentSession->Name);
-				}
-				InternalEndSession();
-			}
-
-			//打开文件
 			m_OutputStream.open(filepath);
-			//当文件成功打开时
-			if (m_OutputStream.is_open()) {
-				m_CurrentSession = new InstrumentationSession({ name });
-				WriteHeader();
-			}
-			else {
-				if (Log::GetCoreLogger()) { // Edge case: BeginSession() might be before Log::Init()
-					HZ_CORE_ERROR("Instrumentor could not open results file '{0}'.", filepath);
-				}
-			}
+			WriteHeader();
+			m_CurrentSession = new InstrumentationSession{ name };
 		}
 
 		void EndSession()
 		{
-			std::lock_guard lock(m_Mutex);
-			InternalEndSession();
+			WriteFooter();
+			m_OutputStream.close();
+			delete m_CurrentSession;
+			m_CurrentSession = nullptr;
+			m_ProfileCount = 0;
 		}
 
 		void WriteProfile(const ProfileResult& result)
 		{
-			std::stringstream json;
+			if (m_ProfileCount++ > 0)
+				m_OutputStream << ",";
 
-			//std::string name = result.Name;
-			//std::replace(name.begin(), name.end(), '"', '\'');
+			std::string name = result.Name;
+			std::replace(name.begin(), name.end(), '"', '\'');
 
-			json << std::setprecision(3) << std::fixed;
-			json << ",{";
-			json << "\"cat\":\"function\",";
-			json << "\"dur\":" << (result.End - result.Start) << ',';
-			json << "\"name\":\"" << result.Name << "\",";
-			json << "\"ph\":\"X\",";
-			json << "\"pid\":0,";
-			json << "\"tid\":" << result.ThreadID << ",";
-			json << "\"ts\":" << result.Start;
-			json << "}";
+			m_OutputStream << "{";
+			m_OutputStream << "\"cat\":\"function\",";
+			m_OutputStream << "\"dur\":" << (result.End - result.Start) << ',';
+			m_OutputStream << "\"name\":\"" << name << "\",";
+			m_OutputStream << "\"ph\":\"X\",";
+			m_OutputStream << "\"pid\":0,";
+			m_OutputStream << "\"tid\":" << result.ThreadID << ",";
+			m_OutputStream << "\"ts\":" << result.Start;
+			m_OutputStream << "}";
 
-			std::lock_guard lock(m_Mutex);
-			if (m_CurrentSession) {
-				m_OutputStream << json.str();
-				m_OutputStream.flush();
-			}
-		}
-		static Instrumentor& Get() {
-			static Instrumentor instance;
-			return instance;
-		}
-	private:
-		Instrumentor()
-			: m_CurrentSession(nullptr)
-		{
-		}
-		~Instrumentor()
-		{
-			EndSession();
+			m_OutputStream.flush();
 		}
 
 		void WriteHeader()
 		{
-			m_OutputStream << "{\"otherData\": {},\"traceEvents\":[{}";
+			m_OutputStream << "{\"otherData\": {},\"traceEvents\":[";
 			m_OutputStream.flush();
 		}
 
@@ -112,20 +81,12 @@ namespace Hazel {
 			//立刻刷新缓冲区，写入目标位置
 			m_OutputStream.flush();
 		}
-		// Note: you must already own lock on m_Mutex before
-		// calling InternalEndSession()
-		void InternalEndSession() {
-			if (m_CurrentSession) {
-				WriteFooter();
-				m_OutputStream.close();
-				delete m_CurrentSession;
-				m_CurrentSession = nullptr;
-			}
+		//返回当前类的实例
+		static Instrumentor& Get()
+		{
+			static Instrumentor instance;
+			return instance;
 		}
-	private:
-		std::mutex m_Mutex;
-		InstrumentationSession* m_CurrentSession;
-		std::ofstream m_OutputStream;
 	};
 
 	class InstrumentationTimer
@@ -150,8 +111,9 @@ namespace Hazel {
 
 			long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch().count();
 			long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
-
-			Instrumentor::Get().WriteProfile({ m_Name, start, end, std::this_thread::get_id() });
+			//返回当前线程的哈希值
+			uint32_t threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
+			Instrumentor::Get().WriteProfile({ m_Name, start, end, threadID });
 
 			m_Stopped = true;
 		}
@@ -162,7 +124,7 @@ namespace Hazel {
 	};
 }
 
-#define HZ_PROFILE 0
+#define HZ_PROFILE 1
 #if HZ_PROFILE
 #define HZ_PROFILE_BEGIN_SESSION(name, filepath) ::Hazel::Instrumentor::Get().BeginSession(name, filepath)
 #define HZ_PROFILE_END_SESSION() ::Hazel::Instrumentor::Get().EndSession()
