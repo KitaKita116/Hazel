@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
+#include "ScriptableEntity.h"
 
 namespace Hazel
 {
@@ -47,6 +48,24 @@ namespace Hazel
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		//定义一个返回值是ScriptableEntity，参数为空的函数指针
+		ScriptableEntity* (*InstantiateScript)();
+		//定义一个返回值是void，参数为NativeScriptComponent*的函数指针
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind()
+		{
+			//转为基类类型
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
 	};
 
 }
