@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Hazel.h>
+#include "SceneHierarchyPanel.h"
 
 namespace Hazel
 {
@@ -28,6 +29,9 @@ namespace Hazel
 		Ref<Texture2D> m_kitaTexture;
 
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+
+		// Panels
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		Ref<Framebuffer> m_Framebuffer;

@@ -55,7 +55,7 @@ namespace Hazel {
 			{
 				auto& transform = GetComponent<TransformComponent>().Transform;
 				float speed = 5.0f;
-
+				
 				if (Input::IsKeyPressed(Key::A))
 					transform[3][0] -= speed * ts;
 				if (Input::IsKeyPressed(Key::D))
@@ -69,6 +69,8 @@ namespace Hazel {
 
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -176,6 +178,8 @@ namespace Hazel {
 		}
 
 		ImGui::Begin("Settings");
+
+		m_SceneHierarchyPanel.OnImGuiRender();
 
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
