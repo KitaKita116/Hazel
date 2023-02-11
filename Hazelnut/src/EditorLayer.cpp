@@ -26,10 +26,14 @@ namespace Hazel {
 		m_Framebuffer = Framebuffer::Create(spec);
 
 		m_ActiveScene = CreateRef<Scene>();
+
 		auto square = m_ActiveScene->CreateEntity("Quad");
 		square.AddComponent<SpriteRendererComponent>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-
 		m_SquareEntity = square;
+
+		auto other = m_ActiveScene->CreateEntity("other");
+		other.AddComponent<SpriteRendererComponent>(glm::vec4(0.0, 1.0, 1.0, 1.0));
+		m_otherEntity = other;
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 		m_CameraEntity.AddComponent<CameraComponent>();
