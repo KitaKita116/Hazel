@@ -19,7 +19,10 @@ namespace Hazel
 		T& AddComponent(Args&&... args)
 		{
 			HZ_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			//用来解决创建相机后没有调整viewportsize的问题
+			m_Scene->OnComponentAdded<T>(*this, component);
+			return component;
 		}
 		//获取组件
 		template<typename T>
@@ -43,7 +46,6 @@ namespace Hazel
 		}
 		//提供一个本类型到bool的隐式转换
 		operator bool() const { return m_EntityHandle != entt::null; }
-
 		entt::entity getEntityID() { return m_EntityHandle; }
 
 		bool operator==(const Entity& other) const

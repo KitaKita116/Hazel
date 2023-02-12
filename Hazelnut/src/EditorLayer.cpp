@@ -47,8 +47,8 @@ namespace Hazel {
 		public:
 			virtual void OnCreate()override
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
-				transform[3][0] = rand() % 10 - 5.0f;
+				auto& transform = GetComponent<TransformComponent>().Translation;
+				transform.x = rand() % 10 - 5.0f;
 			}
 
 			virtual void OnDestroy()override
@@ -57,17 +57,17 @@ namespace Hazel {
 
 			virtual void OnUpdate(Timestep ts)override
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& transform = GetComponent<TransformComponent>().Translation;
 				float speed = 5.0f;
 
 				if (Input::IsKeyPressed(Key::A))
-					transform[3][0] -= speed * ts;
+					transform.x -= speed * ts;
 				if (Input::IsKeyPressed(Key::D))
-					transform[3][0] += speed * ts;
+					transform.x += speed * ts;
 				if (Input::IsKeyPressed(Key::W))
-					transform[3][1] += speed * ts;
+					transform.y += speed * ts;
 				if (Input::IsKeyPressed(Key::S))
-					transform[3][1] -= speed * ts;
+					transform.y -= speed * ts;
 			}
 		};
 

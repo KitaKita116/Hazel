@@ -15,10 +15,15 @@ namespace Hazel
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = std::string());
+		void DestroyEntity(Entity entity);
 
 		void OnUpdate(Timestep ts);
 		//当视口大小变化时
 		void OnViewportResize(uint32_t width, uint32_t height);
+
+	private:
+		template<typename T>
+		void OnComponentAdded(Entity entity, T& component);
 	private:
 		//包含所有entity的容器
 		entt::registry m_Registry;
