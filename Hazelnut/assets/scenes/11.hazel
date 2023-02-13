@@ -49,8 +49,8 @@ Entities:
     TagComponent:
       Tag: QuadA
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [-2.5999999, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0, 0.293436527, 1, 1]
+      Color: [0.934363008, 1, 0, 1]

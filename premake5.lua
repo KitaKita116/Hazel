@@ -179,6 +179,8 @@ project "Hazelnut"
 	includedirs
 	{
 		"Hazel/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
 		"Hazel/src",
 		"Hazel/vendor",
 		"%{IncludeDir.glm}",
@@ -187,6 +189,8 @@ project "Hazelnut"
 
 	links
 	{
+		"GLFW",
+		"Glad",
 		"Hazel"
 	}
 
