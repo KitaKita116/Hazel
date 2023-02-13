@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Hazel/Scene/SceneSerializer.h"
 
 namespace Hazel {
 
@@ -27,54 +28,58 @@ namespace Hazel {
 
 		m_ActiveScene = CreateRef<Scene>();
 
-		auto square = m_ActiveScene->CreateEntity("QuadA");
-		square.AddComponent<SpriteRendererComponent>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-		m_SquareEntity = square;
+		//auto square = m_ActiveScene->CreateEntity("QuadA");
+		//square.AddComponent<SpriteRendererComponent>(glm::vec4(1.0, 0.0, 0.0, 1.0));
+		//m_SquareEntity = square;
 
-		auto other = m_ActiveScene->CreateEntity("QuadB");
-		other.AddComponent<SpriteRendererComponent>(glm::vec4(0.0, 1.0, 1.0, 1.0));
-		m_otherEntity = other;
+		//auto other = m_ActiveScene->CreateEntity("QuadB");
+		//other.AddComponent<SpriteRendererComponent>(glm::vec4(0.0, 1.0, 1.0, 1.0));
+		//m_otherEntity = other;
 
-		m_CameraEntity = m_ActiveScene->CreateEntity("Camera A");
-		m_CameraEntity.AddComponent<CameraComponent>();
+		//m_CameraEntity = m_ActiveScene->CreateEntity("Camera A");
+		//m_CameraEntity.AddComponent<CameraComponent>();
 
-		m_SecondCamera = m_ActiveScene->CreateEntity("Camera B");
-		auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
-		cc.Primary = false;
+		//m_SecondCamera = m_ActiveScene->CreateEntity("Camera B");
+		//auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
+		//cc.Primary = false;
 
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			virtual void OnCreate()override
-			{
-				auto& transform = GetComponent<TransformComponent>().Translation;
-				transform.x = rand() % 10 - 5.0f;
-			}
+		//class CameraController : public ScriptableEntity
+		//{
+		//public:
+		//	virtual void OnCreate()override
+		//	{
+		//		auto& transform = GetComponent<TransformComponent>().Translation;
+		//		transform.x = rand() % 10 - 5.0f;
+		//	}
 
-			virtual void OnDestroy()override
-			{
-			}
+		//	virtual void OnDestroy()override
+		//	{
+		//	}
 
-			virtual void OnUpdate(Timestep ts)override
-			{
-				auto& transform = GetComponent<TransformComponent>().Translation;
-				float speed = 5.0f;
+		//	virtual void OnUpdate(Timestep ts)override
+		//	{
+		//		auto& transform = GetComponent<TransformComponent>().Translation;
+		//		float speed = 5.0f;
 
-				if (Input::IsKeyPressed(Key::A))
-					transform.x -= speed * ts;
-				if (Input::IsKeyPressed(Key::D))
-					transform.x += speed * ts;
-				if (Input::IsKeyPressed(Key::W))
-					transform.y += speed * ts;
-				if (Input::IsKeyPressed(Key::S))
-					transform.y -= speed * ts;
-			}
-		};
+		//		if (Input::IsKeyPressed(Key::A))
+		//			transform.x -= speed * ts;
+		//		if (Input::IsKeyPressed(Key::D))
+		//			transform.x += speed * ts;
+		//		if (Input::IsKeyPressed(Key::W))
+		//			transform.y += speed * ts;
+		//		if (Input::IsKeyPressed(Key::S))
+		//			transform.y -= speed * ts;
+		//	}
+		//};
 
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		//m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		//m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		//SceneSerializer sc(m_ActiveScene);
+		//sc.Deserialize("assets/scenes/Example.hazel");
+		//sc.Serialize("assets/scenes/Example.hazel");
 	}
 
 	void EditorLayer::OnDetach()
@@ -160,11 +165,18 @@ namespace Hazel {
 
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+		//float minWinSizeX = style.WindowMinSize.x;
+		//style.WindowMinSize.x = 370.0f;
+		//设置窗口的最小宽度
+		style.WindowMinSize.x = 370.0f;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
+
+		//style.WindowMinSize.x = minWinSizeX;
 
 		if (ImGui::BeginMenuBar())
 		{
@@ -174,10 +186,20 @@ namespace Hazel {
 				// which we can't undo at the moment without finer window depth/z control.
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 
+				if (ImGui::MenuItem("Load scene")) {
+					SceneSerializer sc(m_ActiveScene);
+					sc.Deserialize("assets/scenes/Example.hazel");
+				}
+
+				if (ImGui::MenuItem("Save Scene"))
+				{
+					SceneSerializer sc(m_ActiveScene);
+					sc.Serialize("assets/scenes/Example.hazel");
+				}
+
 				if (ImGui::MenuItem("Exit")) Hazel::Application::Get().Close();
 				ImGui::EndMenu();
 			}
-
 			ImGui::EndMenuBar();
 		}
 
@@ -206,8 +228,11 @@ namespace Hazel {
 		//返回imgui渲染的视口大小
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
+		//渲染到指定缓冲区
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::End();
 		ImGui::PopStyleVar();
 
