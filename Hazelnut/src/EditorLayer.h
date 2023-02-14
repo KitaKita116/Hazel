@@ -3,6 +3,8 @@
 #include <Hazel.h>
 #include "SceneHierarchyPanel.h"
 
+#include "Hazel/Renderer/EditorCamera.h"
+
 namespace Hazel
 {
 
@@ -50,6 +52,8 @@ namespace Hazel
 		Entity m_SecondCamera;
 
 		bool m_PrimaryCamera = true;
+
+		EditorCamera m_EditorCamera;
 	};
 
 }
