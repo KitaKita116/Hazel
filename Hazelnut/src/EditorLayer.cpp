@@ -212,6 +212,7 @@ namespace Hazel {
 		ImGui::Begin("Settings");
 
 		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
 
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Stats:");

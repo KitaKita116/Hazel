@@ -2,6 +2,7 @@
 
 #include <Hazel.h>
 #include "SceneHierarchyPanel.h"
+#include "ContentBrowserPanel.h"
 
 #include "Hazel/Renderer/EditorCamera.h"
 
@@ -40,6 +41,7 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ContentBrowserPanel m_ContentBrowserPanel;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		Ref<Framebuffer> m_Framebuffer;
