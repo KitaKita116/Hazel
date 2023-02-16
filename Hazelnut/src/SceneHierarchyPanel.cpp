@@ -7,6 +7,8 @@
 
 namespace Hazel
 {
+	extern const std::filesystem::path s_AssetPath;
+
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& contex)
 	{
 		SetContext(contex);
@@ -330,9 +332,25 @@ namespace Hazel
 				}
 			});
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+				if (component.Texture == nullptr)
+					ImGui::ImageButton((ImTextureID)m_ButtomImage->GetRendererID(), ImVec2(100, 100), { 0,1 }, { 1,0 });
+				else
+					ImGui::ImageButton((ImTextureID)component.Texture->GetRendererID(), ImVec2(100, 100), { 0,1 }, { 1,0 });
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Content Browser Item"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(s_AssetPath) / path;
+						component.Texture = Texture2D::Create(texturePath.string());
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 1.0f, 100.0f);
 			});
 	}
 }

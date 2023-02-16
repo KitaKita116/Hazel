@@ -4,6 +4,8 @@
 #include "Hazel/Core/Log.h"
 #include "Hazel/Scene/Scene.h"
 #include "Hazel/Scene/Entity.h"
+#include <filesystem>
+#include "Hazel/Renderer/Texture.h"
 
 namespace Hazel {
 
@@ -22,6 +24,8 @@ namespace Hazel {
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
+
+		Ref<Texture2D> m_ButtomImage= Texture2D::Create("assets/textures/buttonImageNone.png");
 	};
 
 }

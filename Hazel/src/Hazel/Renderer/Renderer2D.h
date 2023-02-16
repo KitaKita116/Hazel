@@ -5,6 +5,7 @@
 #include "Hazel/Renderer/Camera.h"
 
 #include "Hazel/Renderer/EditorCamera.h"
+#include <Hazel/Scene/Components.h>
 
 namespace Hazel
 {
@@ -34,6 +35,8 @@ namespace Hazel
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 	
+		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src);
+
 		struct Statistics
 		{
 			uint32_t DrawCalls;
