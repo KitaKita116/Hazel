@@ -5,7 +5,7 @@
 
 namespace Hazel
 {
-	static const std::filesystem::path s_AssetPath = "assets";
+	extern const std::filesystem::path s_AssetPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
 		:m_CurrentDirectory(s_AssetPath)
@@ -44,10 +44,22 @@ namespace Hazel
 			auto relativePath = std::filesystem::relative(path, s_AssetPath);
 			std::string filenameString = relativePath.filename().string();
 
+			ImGui::PushID(filenameString.c_str());
+
 			Ref<Texture2D> icon = directoryEntry.is_directory() ? m_FolderIcon : m_FileIcon;
 
 			//后两个参数是防止图片翻转
 			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize,thumbnailSize }, { 0,1 }, { 1,0 });
+
+			//发送拖动参数
+			if (ImGui::BeginDragDropSource())
+			{
+				int size = static_cast<int>(relativePath.string().length() + 1); // 加 1 是为了包含字符串末尾的 null 字符
+				const wchar_t* itemPath = relativePath.c_str();
+				ImGui::SetDragDropPayload("Content Browser Item", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				ImGui::Text("%s", filenameString.c_str());
+				ImGui::EndDragDropSource();
+			}
 
 			if (directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
@@ -57,6 +69,8 @@ namespace Hazel
 			ImGui::TextWrapped(filenameString.c_str());
 
 			ImGui::NextColumn();
+
+			ImGui::PopID();
 		}
 
 		ImGui::Columns(1);
