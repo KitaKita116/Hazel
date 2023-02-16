@@ -241,7 +241,7 @@ namespace Hazel {
 		//渲染到指定缓冲区
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
-
+		
 		if (ImGui::BeginDragDropTarget())
 		{
 			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Content Browser Item");
@@ -325,6 +325,7 @@ namespace Hazel {
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (path.extension() != ".hazel") return;
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
