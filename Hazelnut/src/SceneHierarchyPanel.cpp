@@ -241,22 +241,31 @@ namespace Hazel
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			if (ImGui::MenuItem("Camera"))
+			if (!m_SelectionContext.HasComponent<Camera>())
 			{
-				m_SelectionContext.AddComponent<CameraComponent>();
-				ImGui::CloseCurrentPopup();
+				if (ImGui::MenuItem("Camera"))
+				{
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
-			if (ImGui::MenuItem("Transform"))
+			if (!m_SelectionContext.HasComponent<TransformComponent>())
 			{
-				m_SelectionContext.AddComponent<TransformComponent>();
-				ImGui::CloseCurrentPopup();
+				if (ImGui::MenuItem("Transform"))
+				{
+					m_SelectionContext.AddComponent<TransformComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
-
-			if (ImGui::MenuItem("Sprite Renderer"))
+			
+			if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
 			{
-				m_SelectionContext.AddComponent<SpriteRendererComponent>();
-				ImGui::CloseCurrentPopup();
+				if (ImGui::MenuItem("Sprite Renderer"))
+				{
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 
 			ImGui::EndPopup();

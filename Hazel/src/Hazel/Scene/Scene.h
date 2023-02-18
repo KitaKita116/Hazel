@@ -3,6 +3,7 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Renderer/EditorCamera.h"
 #include "entt.hpp"
+#include "Hazel/Core/UUID.h"
 
 namespace Hazel
 {
@@ -14,6 +15,7 @@ namespace Hazel
 		Scene();
 		~Scene();
 
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name);
 		Entity CreateEntity(const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 

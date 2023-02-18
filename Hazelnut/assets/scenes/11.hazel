@@ -1,26 +1,8 @@
 Scene: Untitled
 Entities:
-  - Entity: 12837192831273
+  - Entity: 7356824511379147758
     TagComponent:
-      Tag: Camera B
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: false
-      FixedAspectRatio: false
-  - Entity: 12837192831273
-    TagComponent:
-      Tag: Camera A
+      Tag: camera
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
@@ -36,21 +18,24 @@ Entities:
         OrthographicFar: 1
       Primary: true
       FixedAspectRatio: false
-  - Entity: 12837192831273
+  - Entity: 17091294198702762591
     TagComponent:
-      Tag: QuadB
+      Tag: black
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0, 1, 1, 1]
-  - Entity: 12837192831273
+      Color: [0, 0, 0, 1]
+      TilingFactor: 1
+  - Entity: 3127837883876275203
     TagComponent:
-      Tag: QuadA
+      Tag: white
     TransformComponent:
-      Translation: [-2.5999999, 0, 0]
+      Translation: [-2.20000005, 0, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.934363008, 1, 0, 1]
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\kita.jpg
+      TilingFactor: 1

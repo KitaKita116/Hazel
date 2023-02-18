@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Scene.h"
-
 #include "entt.hpp"
+#include "Hazel/Core/UUID.h"
+#include "Components.h"
 
 namespace Hazel
 {
@@ -47,6 +48,8 @@ namespace Hazel
 		//提供一个本类型到bool的隐式转换
 		operator bool() const { return m_EntityHandle != entt::null; }
 		entt::entity getEntityID() { return m_EntityHandle; }
+
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 
 		bool operator==(const Entity& other) const
 		{

@@ -1,14 +1,21 @@
 #pragma once
-
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
-#include "ScriptableEntity.h"
-#include <glm/gtx/transform.hpp>
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Core/UUID.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Hazel
 {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
 
 	struct TagComponent
 	{
@@ -41,6 +48,8 @@ namespace Hazel
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}
 	};
+
+	class ScriptableEntity;
 
 	struct SpriteRendererComponent
 	{

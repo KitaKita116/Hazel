@@ -25,6 +25,9 @@ namespace Hazel {
 		//m_faceTexture = Texture2D::Create("assets/textures/awesomeface.png");
 		m_kitaTexture = Texture2D::Create("assets/textures/kita.jpg");
 
+		m_IconPlay = Texture2D::Create("assets/textures/iconPlay.png");
+		m_IconStop = Texture2D::Create("assets/textures/iconStop.png");
+
 		FramebufferSpecification spec;
 		spec.Width = 1280;
 		spec.Height = 720;
@@ -82,10 +85,6 @@ namespace Hazel {
 		//m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-		//SceneSerializer sc(m_ActiveScene);
-		//sc.Deserialize("assets/scenes/Example.hazel");
-		//sc.Serialize("assets/scenes/Example.hazel");
 	}
 
 	void EditorLayer::OnDetach()
@@ -111,26 +110,31 @@ namespace Hazel {
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		//Update
-		if (m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
-
-		m_EditorCamera.OnUpdate(ts);
-
 		// Render
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
 
+		switch (m_SceneState)
 		{
-			HZ_PROFILE_SCOPE("Renderer Draw");
+		case SceneState::Edit:
+		{
+			//if (m_ViewportFocused)
+				//m_CameraController.OnUpdate(ts);
 
-			m_ActiveScene->OnUpdateRuntime(ts);
+			m_EditorCamera.OnUpdate(ts);
 
 			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-			m_Framebuffer->Unbind();
+			break;
 		}
+		case SceneState::Play:
+		{
+			m_ActiveScene->OnUpdateRuntime(ts);
+			break;
+		}
+		}
+		m_Framebuffer->Unbind();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -241,7 +245,7 @@ namespace Hazel {
 		//渲染到指定缓冲区
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
-		
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Content Browser Item");
@@ -256,7 +260,45 @@ namespace Hazel {
 		ImGui::End();
 		ImGui::PopStyleVar();
 
+		UI_Toolbar();
+
 		ImGui::End();
+	}
+
+	void EditorLayer::UI_Toolbar()
+	{
+		//将窗口边框填充为0
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		//窗口内Ui边距设置成0
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 0));
+
+		//auto& colors = ImGui::GetStyle().Colors;
+		//const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		//const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+
+		//nullptr表示窗口始终处于打开状态
+		//窗口不包括标题栏、滚动条或滚动条鼠标控制
+		ImGui::Begin("##Toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		float size = ImGui::GetWindowHeight();
+		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+		//设置图标居中显示
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		//最后一个参数表示按钮的边框大小
+		if (ImGui::ImageButton((ImTextureID)icon->GetRendererID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		{
+			if (m_SceneState == SceneState::Edit)
+				OnScenePlay();
+			else if (m_SceneState == SceneState::Play)
+				OnSceneStop();
+		}
+		ImGui::Button("test");
+		ImGui::End();
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
 	}
 
 	void EditorLayer::OnEvent(Hazel::Event& e)
@@ -342,5 +384,16 @@ namespace Hazel {
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
 		}
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+
 	}
 }
