@@ -18,13 +18,26 @@ namespace Hazel {
 		virtual void Resize(uint32_t width, uint32_t height) override;
 
 		//获取帧缓冲颜色附件
-		virtual uint32_t GetColorAttachmentRendererID() const override { return m_ColorAttachment; }
+		virtual uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const override
+		{
+			HZ_CORE_ASSERT(index < m_ColorAttachments.size(), "Invaild index for colorAttachment");
+			return m_ColorAttachments[index];
+		}
 
-		virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
+		virtual const FramebufferSpecification& GetSpecification() const override {
+			return m_Specification;
+		}
 	private:
 		uint32_t m_RendererID = 0;
-		uint32_t m_ColorAttachment = 0, m_DepthAttachment = 0;
 		FramebufferSpecification m_Specification;
+
+		//颜色附件类型
+		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
+		//深度附件类型
+		FramebufferTextureSpecification m_DepthAttachmentSpecification = FramebufferTextureFormat::None;
+
+		std::vector<uint32_t> m_ColorAttachments;
+		uint32_t m_DepthAttachment = 0;
 	};
 
 }
