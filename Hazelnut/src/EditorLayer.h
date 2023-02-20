@@ -44,6 +44,8 @@ namespace Hazel
 		Ref<Texture2D> m_faceTexture;
 		Ref<Texture2D> m_kitaTexture;
 
+		int m_GizmoType = -1;
+
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		// Panels

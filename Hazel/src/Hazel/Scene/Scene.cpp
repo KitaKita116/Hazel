@@ -20,6 +20,20 @@ namespace Hazel {
 	{
 	}
 
+	Entity Scene::GetPrimatyCamera()
+	{
+		auto& view = m_Registry.view<CameraComponent>();
+		for (auto e : view)
+		{
+			const auto& camera = view.get<CameraComponent>(e);
+			if (camera.Primary == true)
+			{
+				return Entity{ e, this };
+			}
+		}
+		return{};
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);

@@ -24,6 +24,8 @@ namespace Hazel
 		//当视口大小变化时
 		void OnViewportResize(uint32_t width, uint32_t height);
 
+		Entity GetPrimatyCamera();
+
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

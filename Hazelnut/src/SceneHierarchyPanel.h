@@ -17,6 +17,8 @@ namespace Hazel {
 
 		void SetContext(const Ref<Scene>& scene);
 
+		Entity GetSelectedEntity() { return m_SelectionContext; }
+
 		void OnImGuiRender();
 	private:
 		void DrawEntityNode(Entity entity);

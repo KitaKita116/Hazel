@@ -8,6 +8,9 @@
 #include "Hazel/Scene/SceneSerializer.h"
 
 #include "Hazel/Utils/PlatformUtils.h"
+#include "ImGuizmo.h"
+
+#include "Hazel/Math/Math.h"
 
 namespace Hazel {
 
@@ -22,7 +25,6 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		//m_faceTexture = Texture2D::Create("assets/textures/awesomeface.png");
 		m_kitaTexture = Texture2D::Create("assets/textures/kita.jpg");
 
 		m_IconPlay = Texture2D::Create("assets/textures/iconPlay.png");
@@ -257,6 +259,55 @@ namespace Hazel {
 			ImGui::EndDragDropTarget();
 		}
 
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity && m_GizmoType != -1)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+
+			float windowWidth = (float)ImGui::GetWindowWidth();
+			float windowHeight = (float)ImGui::GetWindowHeight();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+			// Camera
+			auto cameraEntity = m_ActiveScene->GetPrimatyCamera();
+			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+			const glm::mat4& cameraProjection = camera.GetProjection();
+			glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+			// Entity transform
+			auto& tc = selectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 transform = tc.GetTransform();
+
+			// Snapping
+			bool snap = Input::IsKeyPressed(Key::LeftControl);
+			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+			// Snap to 45 degrees for rotation
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+				snapValue = 45.0f;
+
+			float snapValues[3] = { snapValue,snapValue,snapValue };
+
+			// 绘制的时候, 需要传入camera的v和p矩阵, 再传入要看物体的transform矩阵即可, 就会绘制出
+			// 其localGizmos
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+				nullptr, snap ? snapValues : nullptr);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 translation, rotation, scale;
+				//分解transform矩阵
+				Math::DecomposeTransform(transform, translation, rotation, scale);
+
+				glm::vec3 deltaRotation = rotation - tc.Rotation;
+				tc.Translation = translation;
+				tc.Rotation += deltaRotation;
+				tc.Scale = scale;
+			}
+		}
+
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -339,6 +390,26 @@ namespace Hazel {
 			if (control && shift)
 				SaveSceneAs();
 
+			break;
+		}
+		case Key::Q:
+		{
+			m_GizmoType = -1;
+			break;
+		}
+		case Key::W:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		}
+		case Key::E:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		}
+		case Key::R:
+		{
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
 			break;
 		}
 		}
