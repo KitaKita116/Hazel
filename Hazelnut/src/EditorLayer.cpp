@@ -33,7 +33,7 @@ namespace Hazel {
 		FramebufferSpecification spec;
 		spec.Width = 1280;
 		spec.Height = 720;
-		spec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::Depth};
+		spec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RED_INTEGER,FramebufferTextureFormat::Depth };
 		m_Framebuffer = Framebuffer::Create(spec);
 
 		m_ActiveScene = CreateRef<Scene>();
@@ -137,6 +137,21 @@ namespace Hazel {
 			break;
 		}
 		}
+
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		glm::vec2 viewportsize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		my = viewportsize.y - my;
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX <= viewportsize.x && mouseY <= viewportsize.y)
+		{
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			HZ_CORE_INFO("{0}", pixelData);
+		}
+
 		m_Framebuffer->Unbind();
 	}
 
@@ -236,6 +251,9 @@ namespace Hazel {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 
+		auto viewportOffset = ImGui::GetCursorPos(); // Imgui绘画的下一个窗口的起始坐标，包括toolbar
+		//HZ_CORE_INFO("{0},{1}", viewportOffset.x, viewportOffset.y);
+
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		//只有当鼠标聚焦在窗口，且鼠标在窗口位置时，才进行阻塞io
@@ -248,6 +266,16 @@ namespace Hazel {
 		//渲染到指定缓冲区
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+
+		auto windowsize = ImGui::GetWindowSize();//获取当前窗口的大小
+		ImVec2 minBound = ImGui::GetWindowPos();//获取当前窗口左上角的坐标位置
+
+		minBound.x += viewportOffset.x;
+		minBound.y += viewportOffset.y;
+		
+		ImVec2 maxBound = { minBound.x + windowsize.x,minBound.y + windowsize.y };
+		m_ViewportBounds[0] = { minBound.x,minBound.y };
+		m_ViewportBounds[1] = { maxBound.x,maxBound.y };
 
 		if (ImGui::BeginDragDropTarget())
 		{

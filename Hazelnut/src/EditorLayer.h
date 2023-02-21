@@ -67,6 +67,8 @@ namespace Hazel
 
 		EditorCamera m_EditorCamera;
 
+		glm::vec2 m_ViewportBounds[2];
+
 		enum class SceneState
 		{
 			Edit = 0, Play = 1

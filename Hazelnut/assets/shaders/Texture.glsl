@@ -29,7 +29,7 @@ void main()
 #version 450
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 color2;
+layout(location = 1) out int color2;
 
 in vec2 v_TexCoord;
 in vec4 v_Color;
@@ -80,5 +80,5 @@ void main()
 	}
 	color = texColor;
 
-	color2 = vec4(1.0,1.0,0.0,1.0);
+	color2 = 50;
 }
