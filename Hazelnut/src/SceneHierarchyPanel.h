@@ -18,6 +18,7 @@ namespace Hazel {
 		void SetContext(const Ref<Scene>& scene);
 
 		Entity GetSelectedEntity() { return m_SelectionContext; }
+		void SetSelectedEntity(Entity entity) { m_SelectionContext = entity; }
 
 		void OnImGuiRender();
 	private:
@@ -27,7 +28,7 @@ namespace Hazel {
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
 
-		Ref<Texture2D> m_ButtomImage= Texture2D::Create("assets/textures/buttonImageNone.png");
+		Ref<Texture2D> m_ButtomImage = Texture2D::Create("assets/textures/buttonImageNone.png");
 	};
 
 }

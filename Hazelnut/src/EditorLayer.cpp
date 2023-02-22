@@ -118,6 +118,7 @@ namespace Hazel {
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
+		m_Framebuffer->ClearAttachment(1, -1);
 
 		switch (m_SceneState)
 		{
@@ -146,10 +147,12 @@ namespace Hazel {
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
-		if (mouseX >= 0 && mouseY >= 0 && mouseX <= viewportsize.x && mouseY <= viewportsize.y)
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < viewportsize.x && mouseY < viewportsize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			HZ_CORE_INFO("{0}", pixelData);
+			m_HoverEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			HZ_CORE_INFO("Data:{0}", pixelData);
 		}
 
 		m_Framebuffer->Unbind();
@@ -239,6 +242,10 @@ namespace Hazel {
 		m_ContentBrowserPanel.OnImGuiRender();
 
 		auto stats = Renderer2D::GetStats();
+		std::string name = "";
+		if (m_HoverEntity)
+			name = m_HoverEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hover Entity:%s", name.c_str());
 		ImGui::Text("Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
@@ -251,8 +258,11 @@ namespace Hazel {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 
-		auto viewportOffset = ImGui::GetCursorPos(); // Imgui绘画的下一个窗口的起始坐标，包括toolbar
-		//HZ_CORE_INFO("{0},{1}", viewportOffset.x, viewportOffset.y);
+		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		auto viewportOffset = ImGui::GetWindowPos();
+		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
@@ -266,16 +276,6 @@ namespace Hazel {
 		//渲染到指定缓冲区
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
-
-		auto windowsize = ImGui::GetWindowSize();//获取当前窗口的大小
-		ImVec2 minBound = ImGui::GetWindowPos();//获取当前窗口左上角的坐标位置
-
-		minBound.x += viewportOffset.x;
-		minBound.y += viewportOffset.y;
-		
-		ImVec2 maxBound = { minBound.x + windowsize.x,minBound.y + windowsize.y };
-		m_ViewportBounds[0] = { minBound.x,minBound.y };
-		m_ViewportBounds[1] = { maxBound.x,maxBound.y };
 
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -295,10 +295,7 @@ namespace Hazel {
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
 
-			float windowWidth = (float)ImGui::GetWindowWidth();
-			float windowHeight = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
+			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 			// Camera
 			//auto cameraEntity = m_ActiveScene->GetPrimatyCamera();
 			//const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
@@ -390,6 +387,17 @@ namespace Hazel {
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+	}
+
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (m_ViewportHovered && !Input::IsKeyPressed(Key::LeftAlt) && !ImGuizmo::IsOver())
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoverEntity);
+		}
+		return false;
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -425,22 +433,26 @@ namespace Hazel {
 		}
 		case Key::Q:
 		{
-			m_GizmoType = -1;
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = -1;
 			break;
 		}
 		case Key::W:
 		{
-			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
 			break;
 		}
 		case Key::E:
 		{
-			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			break;
 		}
 		case Key::R:
 		{
-			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 			break;
 		}
 		}

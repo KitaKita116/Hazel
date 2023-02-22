@@ -23,6 +23,7 @@ namespace Hazel
 		void OnEvent(Event& e) override;
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
 		void OpenScene();
@@ -76,6 +77,8 @@ namespace Hazel
 		SceneState m_SceneState = SceneState::Edit;
 
 		Ref<Texture2D> m_IconPlay, m_IconStop, m_IconPause;
+
+		Entity m_HoverEntity;
 	};
 
 }

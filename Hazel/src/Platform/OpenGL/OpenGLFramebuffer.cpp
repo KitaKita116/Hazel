@@ -76,6 +76,17 @@ namespace Hazel
 			return false;
 		}
 
+		static GLenum HazelFBTextureFormatToGL(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+			case FramebufferTextureFormat::RGBA8:       return GL_RGBA8;
+			case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+			}
+
+			HZ_CORE_ASSERT(false, "Unknown format(HazelFBTextureFormatToGL)");
+			return 0;
+		}
 	}
 
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
@@ -179,6 +190,15 @@ namespace Hazel
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
 		return pixelData;
+	}
+
+	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentindex, int value)
+	{
+		HZ_CORE_ASSERT(attachmentindex < m_ColorAttachments.size(), "Invalid attachmentindex(ClearAttachment)");
+
+		auto& spec = m_ColorAttachmentSpecifications[attachmentindex];
+		glClearTexImage(m_ColorAttachments[attachmentindex], 0,
+			Utils::HazelFBTextureFormatToGL(spec.TextureFormat), GL_INT, &value);
 	}
 
 	void OpenGLFramebuffer::Bind()
