@@ -19,6 +19,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
+
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Hazel/vendor/imgui"
@@ -27,8 +28,10 @@ IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["entt"] = "Hazel/vendor/entt/include"
 IncludeDir["yaml_cpp"] = "Hazel/vendor/yaml-cpp/include"
 IncludeDir["ImGuizmo"] = "Hazel/vendor/ImGuizmo"
+IncludeDir["Box2D"] = "Hazel/vendor/Box2D/include"
 
 include "Hazel/vendor/GLFW"
+include "Hazel/vendor/Box2D"
 include "Hazel/vendor/Glad"
 include "Hazel/vendor/imgui"
 include "Hazel/vendor/yaml-cpp"
@@ -68,6 +71,7 @@ project "Hazel"
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
@@ -79,6 +83,7 @@ project "Hazel"
 
 	links 
 	{ 
+		"Box2D",
 		"GLFW",
 		"Glad",
 		"ImGui",
