@@ -26,12 +26,19 @@ namespace Hazel
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
 		void NewScene();
+		//打开场景
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
+		//保存场景
+		void SaveScene();
 		void SaveSceneAs();
+
+		void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
 
 		void OnScenePlay();
 		void OnSceneStop();
+		//复制实体
+		void OnDuplicateEntity();
 
 		// UI Panels
 		void UI_Toolbar();
@@ -57,7 +64,9 @@ namespace Hazel
 		Ref<Framebuffer> m_Framebuffer;
 		Ref<Framebuffer> m_EditorFramebuffer;
 
-		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_ActiveScene, m_EditorScene;
+		std::filesystem::path m_EditorScenePath;
+
 		Entity m_SquareEntity;
 		Entity m_otherEntity;
 

@@ -97,7 +97,7 @@ namespace Hazel {
 		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
 		return out;
 	}
-	
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& v)
 	{
 		//将 YAML 的输出格式设置为 "Flow" 格式即[]
@@ -166,8 +166,8 @@ namespace Hazel {
 
 			auto tc = entity.GetComponent<TransformComponent>();
 			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
-			out << YAML::Key << "Rotation"	  << YAML::Value << tc.Rotation;
-			out << YAML::Key << "Scale"		  << YAML::Value << tc.Scale;
+			out << YAML::Key << "Rotation" << YAML::Value << tc.Rotation;
+			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
 
 			out << YAML::EndMap;
 		}
@@ -359,7 +359,6 @@ namespace Hazel {
 					bc2d.Restitution = boxCollider2DComponent["Restitution"].as<float>();
 					bc2d.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
 				}
-
 			}
 		}
 

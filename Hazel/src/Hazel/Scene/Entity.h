@@ -25,6 +25,15 @@ namespace Hazel
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
+		//添加或者覆盖组件
+		template<typename T, typename... Args>
+		T& AddOrReplaceComponent(Args&&... args)
+		{
+			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			//用来解决创建相机后没有调整viewportsize的问题
+			m_Scene->OnComponentAdded<T>(*this, component);
+			return component;
+		}
 		//获取组件
 		template<typename T>
 		T& GetComponent()
@@ -50,6 +59,7 @@ namespace Hazel
 		entt::entity getEntityID() { return m_EntityHandle; }
 
 		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
+		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 
 		bool operator==(const Entity& other) const
 		{

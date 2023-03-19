@@ -39,6 +39,74 @@ namespace Hazel {
 	{
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID,
+		entt::entity>& enttMap)
+	{
+		auto& v = src.view<Component>();
+		for (auto& e : v)
+		{
+			UUID uid = src.get<IDComponent>(e).ID;
+			entt::entity dstEntt = enttMap.at(uid);
+
+			auto& component = src.get<Component>(e);
+			dst.emplace_or_replace<Component>(dstEntt, component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity& dst, Entity& src)
+	{
+		if (src.HasComponent<Component>())
+			dst.AddOrReplaceComponent<Component>(src.GetComponent<Component>());
+	}
+
+	//¸´ÖÆ³¡¾°
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+
+		auto& srcRegistry = other->m_Registry;
+		auto& dstRegistry = newScene->m_Registry;
+
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		auto& view = srcRegistry.view<IDComponent>();
+		for (auto e : view)
+		{
+			UUID uid = srcRegistry.get<IDComponent>(e).ID;
+			const std::string name = srcRegistry.get<TagComponent>(e).Tag;
+
+			Entity entity = newScene->CreateEntityWithUUID(uid, name);
+			enttMap[uid] = entity.getEntityID();
+		}
+
+		CopyComponent<TransformComponent>(dstRegistry, srcRegistry, enttMap);
+		CopyComponent<SpriteRendererComponent>(dstRegistry, srcRegistry, enttMap);
+		CopyComponent<CameraComponent>(dstRegistry, srcRegistry, enttMap);
+		CopyComponent<NativeScriptComponent>(dstRegistry, srcRegistry, enttMap);
+		CopyComponent<Rigidbody2DComponent>(dstRegistry, srcRegistry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(dstRegistry, srcRegistry, enttMap);
+
+		return newScene;
+	}
+
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		std::string name = entity.GetName();
+		Entity newEntity = Scene::CreateEntity(name);
+
+		CopyComponentIfExists<TransformComponent>(newEntity, entity);
+		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
+	}
+
 	Entity Scene::GetPrimatyCamera()
 	{
 		auto& view = m_Registry.view<CameraComponent>();
