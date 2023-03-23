@@ -230,6 +230,12 @@ namespace Hazel {
 		}
 
 		// Render 2D
+		RenderMainCameraIfExists();
+	}
+
+	void Scene::RenderMainCameraIfExists()
+	{
+		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 
@@ -257,7 +263,7 @@ namespace Hazel {
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-				Renderer2D::DrawSprite(transform.GetTransform(), sprite, 1);
+				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 			}
 
 			Renderer2D::EndScene();

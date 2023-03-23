@@ -50,10 +50,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		rotation += ts * 30;
 
 		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Hazel::Renderer2D::DrawQuad({ 0, 0 }, { 1,1 }, { 1,0,0,1 });
+		//Hazel::Renderer2D::DrawQuad({ 0, 0 }, { 1,1 }, { 1,0,0,1 });
 		Hazel::Renderer2D::DrawQuad({ 0,1 }, { 1,1 }, m_kitaTexture);
-		Hazel::Renderer2D::DrawRotatedQuad({ 1,0 }, { 1,1 }, 45, { 0,1,0,1 });
-		Hazel::Renderer2D::DrawRotatedQuad({ 1, 1 }, { 1,1 }, 45, m_kitaTexture);
+		//Hazel::Renderer2D::DrawRotatedQuad({ 1,0 }, { 1,1 }, 45, { 0,1,0,1 });
+		//Hazel::Renderer2D::DrawRotatedQuad({ 1, 1 }, { 1,1 }, 45, m_kitaTexture);
+
+		//Hazel::Renderer2D::SetLineWidth(20.0f);
+		//Hazel::Renderer2D::DrawLine(glm::vec3(0.0, 0, 0), glm::vec3(1.0, 0.0, 0.0), glm::vec4(1.0f, 0.0, 0.0, 1.0));
+		Hazel::Renderer2D::DrawRect(glm::mat4(1.0f), glm::vec4(1.0f, 0.0, 0.0, 1.0f));
+
 		Hazel::Renderer2D::EndScene();
 	}
 }
@@ -65,11 +70,6 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Begin("Settings");
 
 	auto stats = Hazel::Renderer2D::GetStats();
-	ImGui::Text("Renderer2D Stats:");
-	ImGui::Text("Draw Calls: %d", stats.DrawCall);
-	ImGui::Text("Quads: %d", stats.QuadCount);
-	ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-	ImGui::Text("Indices: %d", stats.GetTotalindicesCount());
 
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 	ImGui::End();

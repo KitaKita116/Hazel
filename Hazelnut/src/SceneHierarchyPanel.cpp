@@ -24,14 +24,20 @@ namespace Hazel
 
 		if (m_Context)
 		{
-			//参数是每个entity的id
-			m_Context->m_Registry.each([&](auto entityID)
-				{
-					//构造该entity
-					Entity e(entityID, m_Context.get());
-					DrawEntityNode(e);
-				}
-			);
+			//参数是每个entity的id 过滤任何组件
+			for (auto entity : m_Context->m_Registry.view<TransformComponent>())
+			{
+				//构造该entity
+				Entity e(entity, m_Context.get());
+				DrawEntityNode(e);
+			}
+			//m_Context->m_Registry.each([&](auto entityID)
+			//	{
+			//		//构造该entity
+			//		Entity e(entityID, m_Context.get());
+			//		DrawEntityNode(e);
+			//	}
+			//);
 			//按下鼠标左键且在窗口上
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				m_SelectionContext = {};

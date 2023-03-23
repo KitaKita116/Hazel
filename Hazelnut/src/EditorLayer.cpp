@@ -30,11 +30,17 @@ namespace Hazel {
 		m_IconPlay = Texture2D::Create("assets/textures/iconPlay.png");
 		m_IconStop = Texture2D::Create("assets/textures/iconStop.png");
 
-		FramebufferSpecification spec;
-		spec.Width = 1280;
-		spec.Height = 720;
-		spec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RED_INTEGER,FramebufferTextureFormat::Depth };
-		m_Framebuffer = Framebuffer::Create(spec);
+		FramebufferSpecification mainSpec;
+		mainSpec.Width = 1280;
+		mainSpec.Height = 720;
+		mainSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RED_INTEGER,FramebufferTextureFormat::Depth };
+		m_EditorFramebuffer = Framebuffer::Create(mainSpec);
+
+		FramebufferSpecification mainCameraSpec;
+		mainCameraSpec.Width = 1280;
+		mainCameraSpec.Height = 720;
+		mainCameraSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::Depth };
+		m_MainCameraFramebuffer = Framebuffer::Create(mainCameraSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorScene = m_ActiveScene;
@@ -103,11 +109,11 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		// Resize
-		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
+		if (FramebufferSpecification spec = m_EditorFramebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
-			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_EditorFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
@@ -116,21 +122,26 @@ namespace Hazel {
 
 		// Render
 		Renderer2D::ResetStats();
-		m_Framebuffer->Bind();
+		m_EditorFramebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
-		m_Framebuffer->ClearAttachment(1, -1);
+		m_EditorFramebuffer->ClearAttachment(1, -1);
 
 		switch (m_SceneState)
 		{
 		case SceneState::Edit:
 		{
-			//if (m_ViewportFocused)
-				//m_CameraController.OnUpdate(ts);
-
 			m_EditorCamera.OnUpdate(ts);
-
 			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+
+			m_MainCameraFramebuffer->Bind();
+			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			RenderCommand::Clear();
+			m_ActiveScene->RenderMainCameraIfExists();
+			m_MainCameraFramebuffer->Unbind();
+
+			m_EditorFramebuffer->Bind();
+
 			break;
 		}
 		case SceneState::Play:
@@ -148,15 +159,52 @@ namespace Hazel {
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
-
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < viewportsize.x && mouseY < viewportsize.y)
 		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			int pixelData = m_EditorFramebuffer->ReadPixel(1, mouseX, mouseY);
 			m_HoverEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 			HZ_CORE_INFO("Data:{0}", pixelData);
 		}
 
-		m_Framebuffer->Unbind();
+		OnOverlayRender();
+
+		m_EditorFramebuffer->Unbind();
+	}
+
+	void EditorLayer::OnOverlayRender()
+	{
+		if (m_SceneState == SceneState::Play)
+		{
+			Entity camera = m_ActiveScene->GetPrimatyCamera();
+			Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().Camera, camera.GetComponent<TransformComponent>().GetTransform());
+		}
+		else
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+		}
+
+		if (m_ShowPhysicsColliders)
+		{
+			// Box Colliders
+			{
+				auto view = m_ActiveScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+				for (auto entity : view)
+				{
+					auto [tc, bc2d] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+					glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
+					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+						* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+						* glm::scale(glm::mat4(1.0f), scale);
+
+					Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+				}
+			}
+		}
+
+		Renderer2D::EndScene();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -252,7 +300,15 @@ namespace Hazel {
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::Checkbox("Show Collider", &m_ShowPhysicsColliders);
 
+		ImGui::End();
+
+		ImGui::Begin("MainCamera");
+		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+		ImVec2 m_renderSize = { viewportSize.x, viewportSize.y };
+		uint32_t cameratextureID = m_MainCameraFramebuffer->GetColorAttachmentRendererID(0);
+		ImGui::Image((void*)cameratextureID, ImVec2{ m_renderSize.x, m_renderSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::End();
 
 		//将窗口边距样式推送到栈上，并设置为 "ImVec2{ 0, 0 }"，这意味着将窗口边距设置为零
@@ -275,7 +331,7 @@ namespace Hazel {
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 		//渲染到指定缓冲区
-		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID(0);
+		uint32_t textureID = m_EditorFramebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
 
 		if (ImGui::BeginDragDropTarget())
@@ -503,16 +559,23 @@ namespace Hazel {
 		if (path.extension() != ".hazel")
 			return;
 
+		HZ_CORE_ASSERT("%s", path);
+
 		Ref<Scene> newScene = CreateRef<Scene>();
+		newScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		SceneSerializer serializer(newScene);
 		if (serializer.Deserialize(path.string()))
 		{
 			m_EditorScene = newScene;
-			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_EditorScene);
 
 			m_ActiveScene = m_EditorScene;
 			m_EditorScenePath = path;
+		}
+		else
+		{
+			m_EditorScene = nullptr;
+			m_ActiveScene = nullptr;
 		}
 	}
 

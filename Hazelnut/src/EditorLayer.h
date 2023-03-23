@@ -61,8 +61,8 @@ namespace Hazel
 		ContentBrowserPanel m_ContentBrowserPanel;
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
-		Ref<Framebuffer> m_Framebuffer;
 		Ref<Framebuffer> m_EditorFramebuffer;
+		Ref<Framebuffer> m_MainCameraFramebuffer;
 
 		Ref<Scene> m_ActiveScene, m_EditorScene;
 		std::filesystem::path m_EditorScenePath;
@@ -78,6 +78,10 @@ namespace Hazel
 		EditorCamera m_EditorCamera;
 
 		glm::vec2 m_ViewportBounds[2];
+
+		void OnOverlayRender();
+
+		bool m_ShowPhysicsColliders = false;
 
 		enum class SceneState
 		{
