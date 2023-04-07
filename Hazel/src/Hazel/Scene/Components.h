@@ -50,8 +50,6 @@ namespace Hazel
 		}
 	};
 
-	class ScriptableEntity;
-
 	struct SpriteRendererComponent
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -73,6 +71,8 @@ namespace Hazel
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 	};
+
+	class ScriptableEntity;
 
 	struct NativeScriptComponent
 	{

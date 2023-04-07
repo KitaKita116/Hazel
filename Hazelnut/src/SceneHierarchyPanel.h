@@ -22,6 +22,9 @@ namespace Hazel {
 
 		void OnImGuiRender();
 	private:
+		template<typename T>
+		void DisplayAddComponentEntry(const std::string& name);
+
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 	private:

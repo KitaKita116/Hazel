@@ -194,6 +194,7 @@ project "Hazelnut"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"Hazel/src",
+		"%{IncludeDir.Box2D}",
 		"Hazel/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
@@ -202,6 +203,7 @@ project "Hazelnut"
 
 	links
 	{
+		"Box2D",
 		"GLFW",
 		"Glad",
 		"Hazel"

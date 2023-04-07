@@ -1,0 +1,101 @@
+Scene: Untitled
+Entities:
+  - Entity: 13544374336682490388
+    TagComponent:
+      Tag: Sprite
+    TransformComponent:
+      Translation: [0.324066639, -1.48274231, 0]
+      Rotation: [0, 0, 0]
+      Scale: [8.23060703, 0.696945786, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 4060293015451228304
+    TagComponent:
+      Tag: Sprite
+    TransformComponent:
+      Translation: [-2.55986309, 0.113135964, 0]
+      Rotation: [0, 0, -0.814349473]
+      Scale: [8.23060894, 0.696946383, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 12557806403035879759
+    TagComponent:
+      Tag: Sprite
+    TransformComponent:
+      Translation: [0.893900573, 0.593888938, -1.27957129]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [1, 1]
+      Density: 1
+      Friction: 0.5
+      Restitution: 1
+      RestitutionThreshold: 0.5
+  - Entity: 673826827470205438
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0
+        PerspectiveFar: 1003
+        OrthographicSize: 7
+        OrthographicNear: -1
+        OrthographicFar: 12
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 3068603800094451906
+    TagComponent:
+      Tag: 11
+    TransformComponent:
+      Translation: [-1.86179733, 0.968688667, 6.0021911e-08]
+      Rotation: [0, 2.98023224e-08, 0]
+      Scale: [1, 1, 0.999994814]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\awesomeface.png
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5

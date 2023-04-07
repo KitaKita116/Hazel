@@ -34,7 +34,7 @@ namespace Hazel
 		//复制实体
 		void DuplicateEntity(Entity entity);
 
-		Entity GetPrimatyCamera();
+		Entity GetPrimaryCamera();
 
 		//包含所有entity的容器
 		entt::registry m_Registry;

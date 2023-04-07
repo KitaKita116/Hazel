@@ -3,6 +3,15 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include "Hazel/Scene/Components.h"
+#include "Hazel/Scene/ScriptableEntity.h"
+#include "Hazel/Core/Input.h"
+
+// Box2D
+#include "box2d/b2_world.h"
+#include "box2d/b2_body.h"
+#include "box2d/b2_fixture.h"
+#include "box2d/b2_polygon_shape.h"
+
 #include <imgui/imgui_internal.h>
 
 namespace Hazel
@@ -46,7 +55,21 @@ namespace Hazel
 			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
 				if (ImGui::MenuItem("Create Empty Entity"))
-					m_Context->CreateEntity("Empty Entity");
+				{
+					m_SelectionContext = m_Context->CreateEntity("Empty Entity");
+				}
+				if (ImGui::MenuItem("Create Camera"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Camera");
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("Create Sprite"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Sprite");
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 
 				ImGui::EndPopup();
 			}
@@ -199,20 +222,23 @@ namespace Hazel
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 			//ImGui::PopStyleVar();
 
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
-			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
-
 			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
+			if (!std::is_same<T, TransformComponent>::value)
 			{
-				ImGui::AlignTextToFramePadding();
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
+				ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+				if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+				{
+					ImGui::OpenPopup("ComponentSettings");
+				}
 
-				ImGui::EndPopup();
+				if (ImGui::BeginPopup("ComponentSettings"))
+				{
+					ImGui::AlignTextToFramePadding();
+					if (ImGui::MenuItem("Remove component"))
+						removeComponent = true;
+
+					ImGui::EndPopup();
+				}
 			}
 
 			if (open)
@@ -225,6 +251,72 @@ namespace Hazel
 				entity.RemoveComponent<T>();
 		}
 	}
+
+	template<typename T>
+	void SceneHierarchyPanel::DisplayAddComponentEntry(const std::string& name)
+	{
+		if (!m_SelectionContext.HasComponent<T>())
+		{
+			if (ImGui::MenuItem(name.c_str()))
+			{
+				m_SelectionContext.AddComponent<T>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+	}
+
+	//class CameraController : public ScriptableEntity
+	//{
+	//public:
+	//	virtual void OnCreate()override
+	//	{
+
+	//	}
+
+	//	virtual void OnDestroy()override
+	//	{
+	//	}
+
+	//	virtual void OnUpdate(Timestep ts)override
+	//	{
+	//		if (HasComponent<Rigidbody2DComponent>())
+	//			moveWithRigidbody(ts);
+	//		else
+	//			moveWithTransform(ts);
+	//	}
+
+	//	void moveWithRigidbody(Timestep ts)
+	//	{
+	//		auto& rb2d = GetComponent<Rigidbody2DComponent>();
+	//		b2Body* body = (b2Body*)rb2d.RuntimeBody;
+	//		b2Vec2 point = body->GetWorldCenter();
+	//		float force = 5.0f * ts;
+
+	//		if (Input::IsKeyPressed(Key::A))
+	//			body->ApplyForce(b2Vec2(-force, 0), point, true);
+	//		if (Input::IsKeyPressed(Key::D))
+	//			body->ApplyForce(b2Vec2(force, 0), point, true);
+	//		if (Input::IsKeyPressed(Key::W))
+	//			body->ApplyForce(b2Vec2(0, force), point, true);
+	//		if (Input::IsKeyPressed(Key::S))
+	//			body->ApplyForce(b2Vec2(0, -force), point, true);
+	//	}
+
+	//	void moveWithTransform(Timestep ts)
+	//	{
+	//		auto& transform = GetComponent<TransformComponent>().Translation;
+	//		float speed = 5.0f;
+
+	//		if (Input::IsKeyPressed(Key::A))
+	//			transform.x -= speed * ts;
+	//		if (Input::IsKeyPressed(Key::D))
+	//			transform.x += speed * ts;
+	//		if (Input::IsKeyPressed(Key::W))
+	//			transform.y += speed * ts;
+	//		if (Input::IsKeyPressed(Key::S))
+	//			transform.y -= speed * ts;
+	//	}
+	//};
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
@@ -251,50 +343,10 @@ namespace Hazel
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			if (!m_SelectionContext.HasComponent<Camera>())
-			{
-				if (ImGui::MenuItem("Camera"))
-				{
-					m_SelectionContext.AddComponent<CameraComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!m_SelectionContext.HasComponent<TransformComponent>())
-			{
-				if (ImGui::MenuItem("Transform"))
-				{
-					m_SelectionContext.AddComponent<TransformComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
-			{
-				if (ImGui::MenuItem("Sprite Renderer"))
-				{
-					m_SelectionContext.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!m_SelectionContext.HasComponent<Rigidbody2DComponent>())
-			{
-				if (ImGui::MenuItem("Rigidbody2D"))
-				{
-					m_SelectionContext.AddComponent<Rigidbody2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-
-			if (!m_SelectionContext.HasComponent<BoxCollider2DComponent>())
-			{
-				if (ImGui::MenuItem("BoxCollider2D"))
-				{
-					m_SelectionContext.AddComponent<BoxCollider2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
+			DisplayAddComponentEntry<CameraComponent>("Camera");
+			DisplayAddComponentEntry<SpriteRendererComponent>("Sprite Renderer");
+			DisplayAddComponentEntry<Rigidbody2DComponent>("Rigidbody 2D");
+			DisplayAddComponentEntry<BoxCollider2DComponent>("Box Collider 2D");
 
 			ImGui::EndPopup();
 		}
@@ -309,7 +361,6 @@ namespace Hazel
 				component.Rotation = glm::radians(rotation);
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});
-
 		DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
 			{
 				auto& camera = component.Camera;
@@ -368,7 +419,6 @@ namespace Hazel
 					ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
 				}
 			});
-
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
@@ -389,7 +439,6 @@ namespace Hazel
 
 				ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 1.0f, 100.0f);
 			});
-
 		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [this](auto& component)
 			{
 				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };

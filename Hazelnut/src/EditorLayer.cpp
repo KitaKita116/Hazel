@@ -16,6 +16,8 @@ namespace Hazel {
 
 	extern const std::filesystem::path s_AssetPath;
 
+	double timeStep = 1;
+
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f, true)
 	{
@@ -42,59 +44,12 @@ namespace Hazel {
 		mainCameraSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::Depth };
 		m_MainCameraFramebuffer = Framebuffer::Create(mainCameraSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
-		m_EditorScene = m_ActiveScene;
+		NewScene();
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-#if 0
-		//auto square = m_ActiveScene->CreateEntity("QuadA");
-		//square.AddComponent<SpriteRendererComponent>(glm::vec4(1.0, 0.0, 0.0, 1.0));
-		//m_SquareEntity = square;
 
-		//auto other = m_ActiveScene->CreateEntity("QuadB");
-		//other.AddComponent<SpriteRendererComponent>(glm::vec4(0.0, 1.0, 1.0, 1.0));
-		//m_otherEntity = other;
-
-		//m_CameraEntity = m_ActiveScene->CreateEntity("Camera A");
-		//m_CameraEntity.AddComponent<CameraComponent>();
-
-		//m_SecondCamera = m_ActiveScene->CreateEntity("Camera B");
-		//auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
-		//cc.Primary = false;
-
-		//class CameraController : public ScriptableEntity
-		//{
-		//public:
-		//	virtual void OnCreate()override
-		//	{
-		//		auto& transform = GetComponent<TransformComponent>().Translation;
-		//		transform.x = rand() % 10 - 5.0f;
-		//	}
-
-		//	virtual void OnDestroy()override
-		//	{
-		//	}
-
-		//	virtual void OnUpdate(Timestep ts)override
-		//	{
-		//		auto& transform = GetComponent<TransformComponent>().Translation;
-		//		float speed = 5.0f;
-
-		//		if (Input::IsKeyPressed(Key::A))
-		//			transform.x -= speed * ts;
-		//		if (Input::IsKeyPressed(Key::D))
-		//			transform.x += speed * ts;
-		//		if (Input::IsKeyPressed(Key::W))
-		//			transform.y += speed * ts;
-		//		if (Input::IsKeyPressed(Key::S))
-		//			transform.y -= speed * ts;
-		//	}
-		//};
-
-		//m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-		//m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-#endif
+		Renderer2D::SetLineWidth(4.0f);
 	}
 
 	void EditorLayer::OnDetach()
@@ -107,6 +62,8 @@ namespace Hazel {
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		timeStep = ts.GetSeconds();
 
 		// Resize
 		if (FramebufferSpecification spec = m_EditorFramebuffer->GetSpecification();
@@ -175,8 +132,10 @@ namespace Hazel {
 	{
 		if (m_SceneState == SceneState::Play)
 		{
-			Entity camera = m_ActiveScene->GetPrimatyCamera();
-			Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().Camera, camera.GetComponent<TransformComponent>().GetTransform());
+			Entity camera = m_ActiveScene->GetPrimaryCamera();
+			if (camera == NULL) return;
+			Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().Camera,
+				camera.GetComponent<TransformComponent>().GetTransform());
 		}
 		else
 		{
@@ -202,6 +161,12 @@ namespace Hazel {
 					Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
 				}
 			}
+		}
+
+		if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
+		{
+			const TransformComponent& transform = selectedEntity.GetComponent<TransformComponent>();
+			Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 		}
 
 		Renderer2D::EndScene();
@@ -276,6 +241,9 @@ namespace Hazel {
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 					OpenScene();
 
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+					SaveScene();
+
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 					SaveSceneAs();
 
@@ -296,6 +264,7 @@ namespace Hazel {
 			name = m_HoverEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hover Entity:%s", name.c_str());
 		ImGui::Text("Stats:");
+		ImGui::Text("Frame: %.2f", 1.0 / timeStep);
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
@@ -440,7 +409,8 @@ namespace Hazel {
 	void EditorLayer::OnEvent(Hazel::Event& e)
 	{
 		m_CameraController.OnEvent(e);
-		m_EditorCamera.OnEvent(e);
+		if (m_SceneState == SceneState::Edit)
+			m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -527,6 +497,9 @@ namespace Hazel {
 
 	void EditorLayer::NewScene()
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
+
 		m_ActiveScene = CreateRef<Scene>();
 		m_EditorScene = m_ActiveScene;
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);

@@ -69,6 +69,7 @@ namespace Hazel {
 		//通过glfwSetWindowUserPointer()把需要的data以指针的方式传递给window。
 		//当需要在callBack函数中获取data时，调用glfwGetWindowUserPointer()
 		glfwSetWindowUserPointer(m_Window, &m_Data);
+		//开启垂直同步
 		SetVSync(true);
 
 		//Set glfw callbacks

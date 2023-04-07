@@ -107,7 +107,7 @@ namespace Hazel {
 		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
 	}
 
-	Entity Scene::GetPrimatyCamera()
+	Entity Scene::GetPrimaryCamera()
 	{
 		auto& view = m_Registry.view<CameraComponent>();
 		for (auto e : view)
@@ -191,6 +191,7 @@ namespace Hazel {
 
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
+
 		// Update scripts
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
@@ -214,6 +215,7 @@ namespace Hazel {
 			//进行一次物理模拟
 			m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
+
 			auto view = m_Registry.view<Rigidbody2DComponent>();
 			for (auto e : view)
 			{
@@ -222,6 +224,10 @@ namespace Hazel {
 				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
+
+				//auto& pos = body->GetWorldCenter();
+				//body->ApplyForce(b2Vec2(10, 0), pos, true);
+
 				const auto& position = body->GetPosition();
 				transform.Translation.x = position.x;
 				transform.Translation.y = position.y;
